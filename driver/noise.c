@@ -790,10 +790,11 @@ NoiseHandshakeConsumeResponse(CONST MESSAGE_HANDSHAKE_RESPONSE *Src, WG_DEVICE *
 
     /* Success! Copy everything to peer */
     MuAcquirePushLockExclusive(&Handshake->Lock);
-    /* It's important to check that the state is still the same, while we
-     * have an exclusive lock.
+    /* Check that the state is the same and that this is still the
+     * initiation we started with, while we have an exclusive lock.
      */
-    if (Handshake->State != State)
+    if (Handshake->State != State ||
+        !CryptoEqualMemory32(Handshake->EphemeralPrivate, EphemeralPrivate, NOISE_PUBLIC_KEY_LEN))
     {
         MuReleasePushLockExclusive(&Handshake->Lock);
         goto fail;
